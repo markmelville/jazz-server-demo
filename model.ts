@@ -1,33 +1,34 @@
-import { CoMap, CoList } from 'cojson';
+import { CoMap, CoList, co } from "jazz-tools";
 
-export type Pipeline = CoMap<{
-  pipelineId: string;
-  environments: ListOfEnvironments['id'];
-  executions?: MapOfExecutions["id"];
-}>;
+export class Pipeline extends CoMap<Pipeline> {
+  pipelineId = co.string;
+  environments = co.ref(ListOfEnvironments);
+  //executions? = co.ref(MapOfExecutions);
+}
 
-export type ListOfEnvironments = CoList<Environment['id']>;
+export class Environment extends CoMap<Environment> {
+  name = co.string;
+  status = co.string;
+  executionId = co.string;
+  approval? = co.ref(Approval);
+}
 
-export type Environment = CoMap<{
-  name: string;
-  status: string;
-  executionId: string;
-  approval?: Approval['id'];
-}>;
+export class ListOfEnvironments extends CoList.Of(co.ref(Environment)) {}
 
-export type Approval = CoMap<{
-  status: string;
-  executionId: string;
-}>;
-
-export type MapOfExecutions = CoMap<{
+export class Approval extends CoMap<Approval> {
+  status = co.string;
+  executionId = co.string;
+}
+/*
+export class MapOfExecutions extends CoMap<{
   [key: string]: Execution['id'];
-}>;
+}> {}
 
-export type Execution = CoMap<{
-  harnessUrl: string;
-  artifactTag: string;
-  startTs: number;
-  endTs: number;
-}>;
+export class Execution extends CoMap<Execution> {
+  harnessUrl = co.string;
+  artifactTag = co.string;
+  startTs = co.number;
+  endTs = co.number;
+}
+*/
   
