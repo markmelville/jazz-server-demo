@@ -28,6 +28,7 @@ function http(handler: AsyncHandler) {
         }
       })
       .catch((err) => {
+        console.log(err)
         const data = err.message;
         res.status(500).send(data);
       });

@@ -5,10 +5,8 @@ import { Environment, ListOfEnvironments, Pipeline } from '../model';
 
 const { router, get, put } = route();
 
-class StackDirectory extends CoMap<StackDirectory> {
-  //[key: string] = co.ref(Pipeline);
-  test = co.ref(Pipeline);
-}
+class StackDirectory extends CoMap.Record(co.ref(Pipeline)) {}
+
 class WorkerAccountRoot extends Account<WorkerAccountRoot> {
   profile = co.ref(Profile);
   root = co.ref(StackDirectory);
@@ -20,6 +18,7 @@ class WorkerAccountRoot extends Account<WorkerAccountRoot> {
     }
   };
 };
+
 const { worker } = await createOrResumeWorker<WorkerAccountRoot>({
   workerName: 'FirstExperiment',
   syncServer: "ws://localhost:4200",
@@ -35,7 +34,8 @@ get("/:id", async ({params:{id}}) => {
 });
 
 
-put("/:id", async ({params}) => {
+put("/:id", async ({params:{id}}) => {
+  var owner = worker;
   var pipeline = new Pipeline({
     pipelineId: "test",
     environments: new ListOfEnvironments([
@@ -43,11 +43,11 @@ put("/:id", async ({params}) => {
         name: "L3",
         status: "RUNNING",
         executionId: "execId",
-      },{ owner: worker })
-    ],{ owner: worker }),
-  }, { owner: worker });
+      },{ owner })
+    ],{ owner }),
+  }, { owner });
 
-  worker.root.test = pipeline;
+  worker.root[id] = pipeline;
 });
 
 

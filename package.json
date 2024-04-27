@@ -10,11 +10,12 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "express": "^4.18.3",
-    "jazz-nodejs": "^0.7.0-alpha.22"
+    "jazz-nodejs": "^0.7.0-alpha.23",
+    "jazz-tools": "^0.7.0-alpha.23"
   },
   "devDependencies": {
     "@types/node": "^20.11.27",
-    "cojson-simple-sync": "^0.6.1",
+    "cojson-simple-sync": "^0.6.1-alpha.0",
     "tsx": "^4.7.1",
     "typescript": "^5.4.2"
   }
