@@ -1,7 +1,7 @@
-import { route } from "./util";
+import { route } from "./util/index.js";
 import { Group, CoMap, co, Account, Profile } from "jazz-tools";
 import { createOrResumeWorker } from 'jazz-nodejs';
-import { Environment, ListOfEnvironments, Pipeline } from '../model';
+import { Environment, ListOfEnvironments, Pipeline } from '../model.js';
 
 const { router, get, put } = route();
 
