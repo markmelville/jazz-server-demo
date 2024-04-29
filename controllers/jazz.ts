@@ -22,19 +22,27 @@ class WorkerAccountRoot extends Account<WorkerAccountRoot> {
 const { worker } = await createOrResumeWorker<WorkerAccountRoot>({
   workerName: 'FirstExperiment',
   syncServer: "ws://localhost:4200",
+  accountSchema: WorkerAccountRoot
 });
 
 get("/", async () => {
-  return worker.root;
+  const stacks = await worker._refs.root?.load();
+  console.log(stacks);
+  return stacks;
 });
 
 
 get("/:id", async ({params:{id}}) => {
-  return worker.root[id];
+  const stacks = await worker._refs.root?.load();
+  return stacks?.[id];
 });
 
 
 put("/:id", async ({params:{id}}) => {
+  const stacks = await worker._refs.root?.load();
+  if (!stacks) {
+    return { error: "Stack directory not found" };
+  }
   var owner = worker;
   var pipeline = new Pipeline({
     pipelineId: "test",
@@ -47,7 +55,7 @@ put("/:id", async ({params:{id}}) => {
     ],{ owner }),
   }, { owner });
 
-  worker.root[id] = pipeline;
+  stacks[id] = pipeline;
 });
 
 
