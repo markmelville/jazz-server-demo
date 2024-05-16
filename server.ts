@@ -1,5 +1,6 @@
 import express from "express";
 import fs from "fs";
+import "dotenv/config";
 
 const port = 8500;
 
@@ -16,7 +17,6 @@ const controllerPromises = fs.readdirSync("./controllers", { withFileTypes: true
       app.use(basePath, routes);
     }
   });
-  
 // wait for all controller routes to be added
 Promise.all(controllerPromises).then(() => {
   // catch-all route

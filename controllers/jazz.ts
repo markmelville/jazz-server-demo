@@ -1,53 +1,58 @@
 import { route } from "./util/index.js";
-import { Group, CoMap, co, Account, Profile } from "jazz-tools";
-import { createOrResumeWorker } from 'jazz-nodejs';
+import { Group, CoMap, co, Account, Profile, Me } from "jazz-tools";
+import { startWorker } from 'jazz-nodejs';
 import { Environment, ListOfEnvironments, Pipeline } from '../model.js';
 
 const { router, get, put } = route();
 
 class StackDirectory extends CoMap.Record(co.ref(Pipeline)) {}
 
-class WorkerAccountRoot extends Account<WorkerAccountRoot> {
+class WorkerAccountRoot extends Account {
   profile = co.ref(Profile);
   root = co.ref(StackDirectory);
   migrate = () => {
     if (!this._refs.root) {
-      const group = new Group({ owner: this });
+      const group = Group.create({ owner: this });
       group.addMember('everyone', 'reader');
-      this.root = new StackDirectory({},{ owner: group });
+      this.root = StackDirectory.create({},{ owner: group });
     }
   };
 };
 
-const { worker } = await createOrResumeWorker<WorkerAccountRoot>({
-  workerName: 'FirstExperiment',
-  syncServer: "ws://localhost:4200",
-  accountSchema: WorkerAccountRoot
-});
+let worker: (WorkerAccountRoot&Me)|undefined = undefined;
+const connect = async () => {
+  const result = await startWorker<WorkerAccountRoot>({
+    syncServer: "ws://localhost:4200",
+    accountSchema: WorkerAccountRoot
+  });
+  worker = result.worker;
+};
+connect().catch(console.log)
+
+const loadRoot = async ()=>worker?._refs?.root?.load()
 
 get("/", async () => {
-  const stacks = await worker._refs.root?.load();
+  const stacks = await loadRoot();
   console.log(stacks);
   return stacks;
 });
 
 
 get("/:id", async ({params:{id}}) => {
-  const stacks = await worker._refs.root?.load();
+  const stacks = await loadRoot();
   return stacks?.[id];
 });
 
 
 put("/:id", async ({params:{id}}) => {
-  const stacks = await worker._refs.root?.load();
-  if (!stacks) {
-    return { error: "Stack directory not found" };
-  }
+  const stacks = await loadRoot();
+  if (!stacks) return { error: "Stack directory not found" };
+  if (!worker) return { error: "Worker directory not found" };
   var owner = worker;
-  var pipeline = new Pipeline({
+  var pipeline = Pipeline.create({
     pipelineId: "test",
-    environments: new ListOfEnvironments([
-      new Environment({
+    environments: ListOfEnvironments.create([
+      Environment.create({
         name: "L3",
         status: "RUNNING",
         executionId: "execId",
