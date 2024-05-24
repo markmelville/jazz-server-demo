@@ -17,6 +17,7 @@ const controllerPromises = fs.readdirSync("./controllers", { withFileTypes: true
       app.use(basePath, routes);
     }
   });
+
 // wait for all controller routes to be added
 Promise.all(controllerPromises).then(() => {
   // catch-all route
